@@ -1,46 +1,52 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-void vigenereCipher(char *input, char *key, char *output, int encrypt) {
-    int inputLen = strlen(input);
+
+void vigenereCipher(char message[], char key[], char result[], int encrypt) {
+    int msgLen = strlen(message);
     int keyLen = strlen(key);
     int i, j;
 
-    for (i = 0, j = 0; i < inputLen; i++, j++) {
-        if (j >= keyLen) {
-            j = 0; 
-        }
-        char currentChar = input[i];
-        char keyChar = key[j];
-        int shift = keyChar - 'a';
-
-        if (!isalpha(currentChar)) {
-            output[i] = currentChar; 
-            j--;
-            continue;
-        }
-        if (encrypt) {
-            output[i] = 'a' + (currentChar - 'a' + shift) % 26;
+    for (i = 0, j = 0; i < msgLen; i++) {
+        if (isalpha(message[i])) {
+            char base;
+            char shift = tolower(key[j % keyLen]) - 'a';
+            if (islower(message[i])) {
+                base = 'a';
+            } else {
+                base = 'A';
+            }
+            if (encrypt) {
+                result[i] = ((message[i] - base + shift) % 26) + base;
+            } else {
+                result[i] = ((message[i] - base - shift + 26) % 26) + base;
+            }
+            j++;
         } else {
-            output[i] = 'a' + (currentChar - 'a' - shift + 26) % 26;
+            result[i] = message[i];
         }
     }
-    output[inputLen] = '\0'; 
+    result[msgLen] = '\0';
 }
+
 int main() {
-    char plaintext[100];
-    char key[100]; 
-    char encrypted[100]; 
-    char decrypted[100]; 
-    printf("Enter the plaintext: ");
-    fgets(plaintext, sizeof(plaintext), stdin);
-    plaintext[strcspn(plaintext, "\n")] = '\0';
+    char message[1000], key[100], encryptedMessage[1000], decryptedMessage[1000];
+
+    printf("Enter the message to encrypt: ");
+    fgets(message, sizeof(message), stdin);
+    message[strcspn(message, "\n")] = '\0'; // Remove the newline character from input
+
     printf("Enter the encryption key: ");
     fgets(key, sizeof(key), stdin);
-    key[strcspn(key, "\n")] = '\0';
-    vigenereCipher(plaintext, key, encrypted, 1);
-    printf("Encrypted message: %s\n", encrypted);
-    vigenereCipher(encrypted, key, decrypted, 0);
-    printf("Decrypted message: %s\n", decrypted);
+    key[strcspn(key, "\n")] = '\0'; // Remove the newline character from input
+
+    // Encrypt the message
+    vigenereCipher(message, key, encryptedMessage, 1);
+    printf("Encrypted Message: %s\n", encryptedMessage);
+
+    // Decrypt the encrypted message
+    vigenereCipher(encryptedMessage, key, decryptedMessage, 0);
+    printf("Decrypted Message: %s\n", decryptedMessage);
+
     return 0;
 }
